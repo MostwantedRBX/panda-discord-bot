@@ -10,6 +10,7 @@ import (
 	"github.com/mostwantedrbx/discord-go/config"
 	"github.com/mostwantedrbx/discord-go/net"
 	"github.com/mostwantedrbx/discord-go/pyscripts"
+	//"github.com/mostwantedrbx/discord-go/pyscripts"
 )
 
 //	init some variables
@@ -19,7 +20,7 @@ var BotID string
 
 //	this function gets called from the main.go file
 func Start() {
-	pyscripts.RunScript()
+	//pyscripts.RunScript()
 	//	create a new discord session
 	goBot, err := discordgo.New("Bot " + config.Token)
 
@@ -87,5 +88,6 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		var a = strings.SplitAfter(cont, " ")
 		address := a[1]
 		net.DownloadFile(address, "tacos.png")
+		pyscripts.RunScript("convert")
 	}
 }

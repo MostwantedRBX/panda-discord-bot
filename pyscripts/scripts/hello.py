@@ -1,2 +1,6 @@
-# Secret plans for this stuffs
-print("hello world")
+import sys
+
+def main():
+    print(sys.argv[1])
+
+main()
