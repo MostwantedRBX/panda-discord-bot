@@ -2,6 +2,8 @@ package bot
 
 import (
 	"fmt"
+	"math/rand"
+	"strconv"
 	"strings"
 
 	"github.com/mostwantedrbx/discord-go/config"
@@ -19,7 +21,7 @@ func Start() {
 	//	create a new discord session
 	goBot, err := discordgo.New("Bot " + config.Token)
 
-	// error checking
+	//	error checking
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -52,6 +54,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == BotID || !strings.HasPrefix(m.Content, config.BotPrefix) {
 		return
 	}
+
 	//	sanity check
 	fmt.Println("caught message")
 
@@ -62,5 +65,18 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.Contains(cont, "ping") {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Pong!")
 	}
-
+	if strings.Contains(cont, "echo") {
+		_, _ = s.ChannelMessageSend(m.ChannelID, strings.SplitAfter(m.Content, "!echo")[1])
+	}
+	if strings.Contains(cont, "roll") {
+		//	note to self: watch variable names, especially ones from other packages.
+		if b, err := strconv.Atoi(strings.SplitAfter(cont, " ")[1]); err == nil {
+			var a = rand.Intn(6 * b)
+			for ok := true; ok; ok = (a < b) {
+				a = rand.Intn(6 * b)
+				fmt.Println("rerolling die....")
+			}
+			_, _ = s.ChannelMessageSend(m.ChannelID, "You rolled "+strconv.Itoa(b)+" dice. \nThe result was: "+strconv.Itoa(a))
+		}
+	}
 }
