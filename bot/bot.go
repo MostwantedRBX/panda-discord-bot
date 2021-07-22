@@ -6,18 +6,20 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mostwantedrbx/discord-go/config"
-
 	"github.com/bwmarrin/discordgo"
+	"github.com/mostwantedrbx/discord-go/config"
+	"github.com/mostwantedrbx/discord-go/net"
+	"github.com/mostwantedrbx/discord-go/pyscripts"
 )
 
 //	init some variables
 var BotID string
-var goBot *discordgo.Session
+
+//var goBot *discordgo.Session
 
 //	this function gets called from the main.go file
 func Start() {
-
+	pyscripts.RunScript()
 	//	create a new discord session
 	goBot, err := discordgo.New("Bot " + config.Token)
 
@@ -74,9 +76,16 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			var a = rand.Intn(6 * b)
 			for ok := true; ok; ok = (a < b) {
 				a = rand.Intn(6 * b)
-				fmt.Println("rerolling die....")
+				fmt.Println("rerolling die...")
 			}
 			_, _ = s.ChannelMessageSend(m.ChannelID, "You rolled "+strconv.Itoa(b)+" dice. \nThe result was: "+strconv.Itoa(a))
+		} else {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "You need to supply the number of dice to roll.\nFor example, for three dice: !roll 3")
 		}
+	}
+	if strings.Contains(cont, "convert") {
+		var a = strings.SplitAfter(cont, " ")
+		address := a[1]
+		net.DownloadFile(address, "tacos.png")
 	}
 }
