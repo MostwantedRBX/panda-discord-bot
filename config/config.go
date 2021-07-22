@@ -18,6 +18,7 @@ type configStruct struct {
 	BotPrefix string `json:"BotPrefix"`
 }
 
+// function is used to get token and other config settings at the start of the bot
 func ReadConfig() error {
 	fmt.Println("reading config...")
 	file, err := ioutil.ReadFile("./config.json")
@@ -27,14 +28,16 @@ func ReadConfig() error {
 		return err
 	}
 
-	fmt.Println(string(file))
-
+	//fmt.Println(string(file))
+	//unpack json
 	err = json.Unmarshal(file, &config)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
-	fmt.Println(config.Token)
+
+	//fmt.Println(config.Token)
+	//set global vars to be used
 	Token = config.Token
 	BotPrefix = config.BotPrefix
 

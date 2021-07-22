@@ -8,14 +8,20 @@ import (
 )
 
 func main() {
+
+	//	read the config
 	err := config.ReadConfig()
 
+	//	catch error if needed
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Couldn't connect to discord... maybe try again later? (ツ) \n", err.Error())
 		return
 	}
+
+	//	start bot
 	bot.Start()
 
+	//	wait for commands
 	<-make(chan struct{})
 
 }
