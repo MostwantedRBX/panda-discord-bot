@@ -65,15 +65,17 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var cont = strings.ToLower(m.Content)
 
 	//	long list of if statements to check what we need to do
-	if strings.Contains(cont, "ping") {
+	switch command := strings.SplitAfter(cont, " "); command[0] {
+	case "!ping":
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
-	if strings.Contains(cont, "echo") {
-		_, _ = s.ChannelMessageSend(m.ChannelID, strings.SplitAfter(m.Content, "!echo")[1])
-	}
-	if strings.Contains(cont, "roll") {
-		//	note to self: watch variable names, especially ones from other packages.
-		if b, err := strconv.Atoi(strings.SplitAfter(cont, " ")[1]); err == nil {
+
+	case "!echo":
+		if len(command) > 1 {
+			_, _ = s.ChannelMessageSend(m.ChannelID, command[1])
+		}
+
+	case "!roll":
+		if b, err := strconv.Atoi(command[1]); err == nil {
 			var a = rand.Intn(6 * b)
 			for ok := true; ok; ok = (a < b) {
 				a = rand.Intn(6 * b)
@@ -83,11 +85,9 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else {
 			_, _ = s.ChannelMessageSend(m.ChannelID, "You need to supply the number of dice to roll.\nFor example, for three dice: !roll 3")
 		}
-	}
-	if strings.Contains(cont, "convert") {
-		var a = strings.SplitAfter(cont, " ")
-		address := a[1]
-		net.DownloadFile(address, "tacos.png")
+
+	case "!convert":
+		net.DownloadFile(command[1], "tacos.png")
 		pyscripts.RunScript("convert")
 	}
 }
