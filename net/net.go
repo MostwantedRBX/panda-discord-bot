@@ -7,7 +7,6 @@ import (
 	"os"
 )
 
-//	Hoping to be able to convert images in the near future.
 func DownloadFile(address string, filename string) error {
 	response, err := http.Get(address)
 	if err != nil {

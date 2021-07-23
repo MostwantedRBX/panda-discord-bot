@@ -19,16 +19,18 @@ import (
 var ascii string
 
 func RunScript(script string) {
-	fmt.Println("taocs")
+	fmt.Println("Running a Python script")
 	if script == "convert" {
-		cmd := exec.Command("python", "-c", ascii, "./tacos.png")
+		cmd := exec.Command("python", "-c", ascii, "./tacos.png") //	TODO: don't hardcode the filename.
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		//	run and print the results and output of the python script
 		log.Println(cmd.Run())
 	}
 }
 
 const (
+	//	TODO: add this to the config
 	pastebinDevKey = "b09173a266b328998674c8f48d1fc605"
 )
 
@@ -46,14 +48,13 @@ type Pastebin struct{}
 // Put uploads text to Pastebin with optional title returning the ID or an error.
 func (p Pastebin) Put(text, title string) (id string, err error) {
 	data := url.Values{}
-	// Required values.
-	data.Set("api_dev_key", pastebinDevKey)
-	data.Set("api_option", "paste") // Create a paste.
-	data.Set("api_paste_code", text)
-	// Optional values.
-	data.Set("api_paste_name", title)      // The paste should have title "title".
-	data.Set("api_paste_private", "0")     // Create a public paste.
-	data.Set("api_paste_expire_date", "N") // The paste should never expire.
+
+	data.Set("api_dev_key", pastebinDevKey) //	dev key
+	data.Set("api_option", "paste")         //	create a paste.
+	data.Set("api_paste_code", text)        //	the content of the paste
+	data.Set("api_paste_name", title)       //	the paste should have title "title".
+	data.Set("api_paste_private", "0")      //	create a public paste.
+	data.Set("api_paste_expire_date", "N")  //	the paste should never expire.
 
 	resp, err := http.PostForm("https://pastebin.com/api/api_post.php", data)
 	if err != nil {

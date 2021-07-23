@@ -4,9 +4,8 @@ import (
 	"math/rand"
 )
 
-// Random stuffs
-
 func ReturnRandomPokemon() string {
+	//	TODO: find a better way to store this, seems like a mundane use of resources to have a package dedicated to this
 	pokemon := [6]string{
 		"Whose that pokemon!",
 		"Its Pikachu!",

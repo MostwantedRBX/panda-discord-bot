@@ -6,11 +6,10 @@ except:
     print("Pillow is not installed! Install it using the following command: 'pip3 install pillow'")
     quit()
 
-print(sys.argv)
-# Chars to use with making the image, from most intense to least intense
+#   Chars to use with making the image, from most intense to least intense
 ASCII_CHARS = ["@","#","S","%","?","*","+",";",":",",","."," "]
 
-# Resize the image to make it easier to work with
+#   Resize the image to make it easier to work with
 def image_resize(image,new_width=50):
     width, height = image.size
     ratio = height/width
@@ -18,12 +17,12 @@ def image_resize(image,new_width=50):
     resized_image = image.resize((new_width,new_height))
     return(resized_image)
 
-# Grayscale the image
+#   Grayscale the image
 def convert_to_grayscale(image):
     grayscale_image = image.convert("L")
     return(grayscale_image)
 
-# Converts the pixels to the characters on the table above. Returns the string of pixel to characters.
+#   Converts the pixels to the characters on the table above. Returns the string of pixel to characters.
 def convert_to_ascii(image):
     pixels = image.getdata()
     characters = "".join([ASCII_CHARS[pixel//25] for pixel in pixels])

@@ -68,17 +68,24 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var cont = strings.ToLower(m.Content)
 
 	//	long list of if statements to check what we need to do
+	//	command splits the message recieved into the command, on command[0] and the arguments on command[1]
 	switch command := strings.SplitAfter(cont, " "); command[0] {
+
 	case "!ping ":
+		//	used to test if the bot is on
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Pong!")
 
 	case "!echo ":
 		if len(command) > 1 {
 			_, _ = s.ChannelMessageSend(m.ChannelID, command[1])
+
 		}
 	case "!pokemon ":
+		//	silly command for funsies
 		_, _ = s.ChannelMessageSend(m.ChannelID, storage.ReturnRandomPokemon())
+
 	case "!roll ":
+		//	rolls command[1] amount of dice
 		if b, err := strconv.Atoi(command[1]); err == nil {
 			var a = rand.Intn(6 * b)
 			for ok := true; ok; ok = (a < b) {
@@ -91,10 +98,13 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 	case "!convert ":
-		fmt.Println("tacos")
+		// download the file from the url
 		net.DownloadFile(command[1], "tacos.png")
+
+		//	run the python script to convert the image, and it saves it in a txt file.
 		pyscripts.RunScript("convert")
 
+		//	gets the results
 		fmt.Println("Opening a file ")
 		var file, err = os.ReadFile("./ascii-image.txt")
 
@@ -103,14 +113,17 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		//	send the contents to the pastebin function to be pasted
 		p := pyscripts.Pastebin{}
 		link, err := p.Put(string(file), "Ascii Image")
 
+		//	if it fails, let the user know
 		if err != nil {
 			_, _ = s.ChannelMessageSend(m.ChannelID, "The image failed to convert! Let my owner know!")
 			return
 		}
 
+		//	return the link in a message
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
 
 	}
