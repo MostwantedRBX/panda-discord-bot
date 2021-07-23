@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 
@@ -10,7 +11,9 @@ import (
 	"github.com/mostwantedrbx/discord-go/config"
 	"github.com/mostwantedrbx/discord-go/net"
 	"github.com/mostwantedrbx/discord-go/pyscripts"
-	//"github.com/mostwantedrbx/discord-go/pyscripts"
+	"github.com/mostwantedrbx/discord-go/storage"
+
+	_ "embed"
 )
 
 //	init some variables
@@ -66,15 +69,16 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	//	long list of if statements to check what we need to do
 	switch command := strings.SplitAfter(cont, " "); command[0] {
-	case "!ping":
+	case "!ping ":
 		_, _ = s.ChannelMessageSend(m.ChannelID, "Pong!")
 
-	case "!echo":
+	case "!echo ":
 		if len(command) > 1 {
 			_, _ = s.ChannelMessageSend(m.ChannelID, command[1])
 		}
-
-	case "!roll":
+	case "!pokemon ":
+		_, _ = s.ChannelMessageSend(m.ChannelID, storage.ReturnRandomPokemon())
+	case "!roll ":
 		if b, err := strconv.Atoi(command[1]); err == nil {
 			var a = rand.Intn(6 * b)
 			for ok := true; ok; ok = (a < b) {
@@ -86,8 +90,28 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			_, _ = s.ChannelMessageSend(m.ChannelID, "You need to supply the number of dice to roll.\nFor example, for three dice: !roll 3")
 		}
 
-	case "!convert":
+	case "!convert ":
+		fmt.Println("tacos")
 		net.DownloadFile(command[1], "tacos.png")
 		pyscripts.RunScript("convert")
+
+		fmt.Println("Opening a file ")
+		var file, err = os.ReadFile("./ascii-image.txt")
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		p := pyscripts.Pastebin{}
+		link, err := p.Put(string(file), "Ascii Image")
+
+		if err != nil {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "The image failed to convert! Let my owner know!")
+			return
+		}
+
+		_, _ = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
+
 	}
 }
