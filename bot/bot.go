@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/mostwantedrbx/discord-go/config"
@@ -23,20 +24,19 @@ var BotID string
 
 //	this function gets called from the main.go file
 func Start() {
-	//pyscripts.RunScript()
 	//	create a new discord session
 	goBot, err := discordgo.New("Bot " + config.Token)
-
 	//	error checking
 	if err != nil {
 		fmt.Println(err.Error())
+		time.Sleep(time.Second)
 		return
 	}
 
 	u, err := goBot.User("@me")
-
 	if err != nil {
 		fmt.Println(err.Error())
+		time.Sleep(time.Second)
 	}
 
 	BotID = u.ID
@@ -44,9 +44,9 @@ func Start() {
 	//	tells discordgo what function will process messages
 	goBot.AddHandler(messageHandler)
 	err = goBot.Open()
-
 	if err != nil {
 		fmt.Println(err.Error())
+		time.Sleep(time.Second)
 		return
 	}
 
@@ -78,8 +78,8 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	case "!echo ":
 		if len(command) > 1 {
 			_, _ = s.ChannelMessageSend(m.ChannelID, command[1])
-
 		}
+
 	case "!pokemon ":
 		//	silly command for funsies
 		_, _ = s.ChannelMessageSend(m.ChannelID, storage.ReturnRandomPokemon())
@@ -107,24 +107,22 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		//	gets the results
 		fmt.Println("Opening a file ")
 		var file, err = os.ReadFile("./ascii-image.txt")
-
 		if err != nil {
 			fmt.Println(err.Error())
+			time.Sleep(time.Second)
 			return
 		}
 
 		//	send the contents to the pastebin function to be pasted
-		p := pyscripts.Pastebin{}
+		p := storage.Pastebin{}
 		link, err := p.Put(string(file), "Ascii Image")
-
-		//	if it fails, let the user know
 		if err != nil {
 			_, _ = s.ChannelMessageSend(m.ChannelID, "The image failed to convert! Let my owner know!")
+			time.Sleep(time.Second)
 			return
+		} else {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
 		}
-
-		//	return the link in a message
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
 
 	}
 }
