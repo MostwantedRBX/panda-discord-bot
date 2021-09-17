@@ -10,10 +10,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var (
-	Logs zerolog.Logger
-)
-
 func main() {
 	//	log setup
 	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(0666))
