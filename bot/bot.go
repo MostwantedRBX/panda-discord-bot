@@ -6,10 +6,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/mostwantedrbx/discord-go/config"
+	"github.com/mostwantedrbx/discord-go/logging"
 	"github.com/mostwantedrbx/discord-go/net"
 	"github.com/mostwantedrbx/discord-go/pyscripts"
 	"github.com/mostwantedrbx/discord-go/storage"
@@ -18,7 +18,7 @@ import (
 )
 
 //	init some variables
-var BotID string
+var botID string
 
 //var goBot *discordgo.Session
 
@@ -26,27 +26,27 @@ var BotID string
 func Start() {
 	//	create a new discord session
 	goBot, err := discordgo.New("Bot " + config.Token)
+
 	//	error checking
 	if err != nil {
-		fmt.Println(err.Error())
-		time.Sleep(time.Second)
-		return
+		logging.LogError(err)
 	}
 
 	u, err := goBot.User("@me")
+
 	if err != nil {
-		fmt.Println(err.Error())
-		time.Sleep(time.Second)
+		logging.LogError(err)
 	}
 
-	BotID = u.ID
+	botID = u.ID
 
 	//	tells discordgo what function will process messages
 	goBot.AddHandler(messageHandler)
 	err = goBot.Open()
 	if err != nil {
-		fmt.Println(err.Error())
-		time.Sleep(time.Second)
+		if err != nil {
+			logging.LogError(err)
+		}
 		return
 	}
 
@@ -57,7 +57,7 @@ func Start() {
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	//	make sure the bot isn't going to trigger itself and check to make sure the bots prefix was used
-	if m.Author.ID == BotID || !strings.HasPrefix(m.Content, config.BotPrefix) {
+	if m.Author.ID == botID || !strings.HasPrefix(m.Content, config.BotPrefix) {
 		return
 	}
 
@@ -73,16 +73,25 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	case "!ping ":
 		//	used to test if the bot is on
-		_, _ = s.ChannelMessageSend(m.ChannelID, "Pong!")
+		_, err := s.ChannelMessageSend(m.ChannelID, "Pong!")
+		if err != nil {
+			logging.LogError(err)
+		}
 
 	case "!echo ":
 		if len(command) > 1 {
-			_, _ = s.ChannelMessageSend(m.ChannelID, command[1])
+			_, err := s.ChannelMessageSend(m.ChannelID, command[1])
+			if err != nil {
+				logging.LogError(err)
+			}
 		}
 
 	case "!pokemon ":
 		//	silly command for funsies
-		_, _ = s.ChannelMessageSend(m.ChannelID, storage.ReturnRandomPokemon())
+		_, err := s.ChannelMessageSend(m.ChannelID, storage.ReturnRandomPokemon())
+		if err != nil {
+			logging.LogError(err)
+		}
 
 	case "!roll ":
 		//	rolls command[1] amount of dice
@@ -92,9 +101,15 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				a = rand.Intn(6 * b)
 				fmt.Println("rerolling die...")
 			}
-			_, _ = s.ChannelMessageSend(m.ChannelID, "You rolled "+strconv.Itoa(b)+" dice. \nThe result was: "+strconv.Itoa(a))
+			_, err := s.ChannelMessageSend(m.ChannelID, "You rolled "+strconv.Itoa(b)+" dice. \nThe result was: "+strconv.Itoa(a))
+			if err != nil {
+				logging.LogError(err)
+			}
 		} else {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "You need to supply the number of dice to roll.\nFor example, for three dice: !roll 3")
+			_, err := s.ChannelMessageSend(m.ChannelID, "You need to supply the number of dice to roll.\nFor example, for three dice: !roll 3")
+			if err != nil {
+				logging.LogError(err)
+			}
 		}
 
 	case "!convert ":
@@ -108,8 +123,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Println("Opening a file ")
 		var file, err = os.ReadFile("./ascii-image.txt")
 		if err != nil {
-			fmt.Println(err.Error())
-			time.Sleep(time.Second)
+			logging.LogError(err)
 			return
 		}
 
@@ -117,11 +131,16 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		p := storage.Pastebin{}
 		link, err := p.Put(string(file), "Ascii Image")
 		if err != nil {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "The image failed to convert! Let my owner know!")
-			time.Sleep(time.Second)
+			_, err2 := s.ChannelMessageSend(m.ChannelID, "The image failed to convert! Let my owner know!")
+			if err2 != nil {
+				logging.LogError(err)
+			}
 			return
 		} else {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
+			_, err = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
+			if err != nil {
+				logging.LogError(err)
+			}
 		}
 
 	}

@@ -5,13 +5,14 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"time"
+
+	"github.com/mostwantedrbx/discord-go/logging"
 )
 
 func DownloadFile(address string, filename string) error {
 	response, err := http.Get(address)
 	if err != nil {
-		time.Sleep(time.Second)
+		logging.LogError(err)
 		return err
 	}
 	defer response.Body.Close()
@@ -24,14 +25,14 @@ func DownloadFile(address string, filename string) error {
 	//	create the file
 	file, err := os.Create(filename)
 	if err != nil {
-		time.Sleep(time.Second)
+		logging.LogError(err)
 		return err
 	}
 	defer file.Close()
 	//	fill the file with the data from the interwebs
 	_, err = io.Copy(file, response.Body)
 	if err != nil {
-		time.Sleep(time.Second)
+		logging.LogError(err)
 		return err
 	}
 	return nil

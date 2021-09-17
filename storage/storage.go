@@ -25,10 +25,8 @@ func ReturnRandomPokemon() string {
 }
 
 var (
-	// ErrPutFailed is returned when a paste could not be uploaded to pastebin.
-	ErrPutFailed = errors.New("pastebin put failed")
-	// ErrGetFailed is returned when a paste could not be fetched from pastebin.
-	ErrGetFailed = errors.New("pastebin get failed")
+	// errPutFailed is returned when a paste could not be uploaded to pastebin.
+	errPutFailed = errors.New("pastebin put failed")
 )
 
 //	pastebin stuff
@@ -54,7 +52,7 @@ func (p Pastebin) Put(text, title string) (id string, err error) {
 
 	if resp.StatusCode != 200 {
 		time.Sleep(time.Second)
-		return "", ErrPutFailed
+		return "", errPutFailed
 	}
 
 	defer resp.Body.Close()

@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"time"
+
+	"github.com/mostwantedrbx/discord-go/logging"
 )
 
 var (
@@ -27,16 +28,14 @@ func ReadConfig() error {
 	file, err := ioutil.ReadFile("./config.json")
 
 	if err != nil {
-		fmt.Println(err.Error())
-		time.Sleep(time.Second)
+		logging.LogError(err)
 		return err
 	}
 
 	//	unpack json
 	err = json.Unmarshal(file, &config)
 	if err != nil {
-		fmt.Println(err.Error())
-		time.Sleep(time.Second)
+		logging.LogError(err)
 		return err
 	}
 
