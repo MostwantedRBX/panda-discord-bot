@@ -2,10 +2,9 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 
-	"github.com/mostwantedrbx/discord-go/logging"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -24,18 +23,18 @@ type configStruct struct {
 
 //	function is used to get token and other config settings at the start of the bot
 func ReadConfig() error {
-	fmt.Println("reading config...")
+	log.Logger.Info().Msg("Reading ./config.json")
 	file, err := ioutil.ReadFile("./config.json")
 
 	if err != nil {
-		logging.LogError(err)
+		log.Logger.Fatal().Msg("Could not read config file.")
 		return err
 	}
 
 	//	unpack json
 	err = json.Unmarshal(file, &config)
 	if err != nil {
-		logging.LogError(err)
+		log.Logger.Fatal().Msg("Could not unpack json file.")
 		return err
 	}
 

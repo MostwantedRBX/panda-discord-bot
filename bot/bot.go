@@ -9,10 +9,10 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/mostwantedrbx/discord-go/config"
-	"github.com/mostwantedrbx/discord-go/logging"
 	"github.com/mostwantedrbx/discord-go/net"
 	"github.com/mostwantedrbx/discord-go/pyscripts"
 	"github.com/mostwantedrbx/discord-go/storage"
+	"github.com/rs/zerolog/log"
 
 	_ "embed"
 )
@@ -29,13 +29,13 @@ func Start() {
 
 	//	error checking
 	if err != nil {
-		logging.LogError(err)
+		log.Logger.Fatal().Msg("Bot could not be started")
 	}
 
 	u, err := goBot.User("@me")
 
 	if err != nil {
-		logging.LogError(err)
+		log.Logger.Fatal().Msg("Bot could not find its user")
 	}
 
 	botID = u.ID
@@ -44,13 +44,11 @@ func Start() {
 	goBot.AddHandler(messageHandler)
 	err = goBot.Open()
 	if err != nil {
-		if err != nil {
-			logging.LogError(err)
-		}
+		log.Logger.Fatal().Msg("Bot could not add a message handler")
 		return
 	}
 
-	fmt.Println("Bot is running.")
+	log.Logger.Info().Msg("Bot is now running")
 
 }
 
@@ -60,9 +58,6 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == botID || !strings.HasPrefix(m.Content, config.BotPrefix) {
 		return
 	}
-
-	//	sanity check
-	fmt.Println("caught message")
 
 	//	save some time re-writing this
 	var cont = strings.ToLower(m.Content)
@@ -75,14 +70,14 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		//	used to test if the bot is on
 		_, err := s.ChannelMessageSend(m.ChannelID, "Pong!")
 		if err != nil {
-			logging.LogError(err)
+			log.Logger.Warn().Caller().Msg("Message failed to send")
 		}
 
 	case "!echo ":
 		if len(command) > 1 {
 			_, err := s.ChannelMessageSend(m.ChannelID, command[1])
 			if err != nil {
-				logging.LogError(err)
+				log.Logger.Warn().Caller().Msg("Message failed to send")
 			}
 		}
 
@@ -90,7 +85,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		//	silly command for funsies
 		_, err := s.ChannelMessageSend(m.ChannelID, storage.ReturnRandomPokemon())
 		if err != nil {
-			logging.LogError(err)
+			log.Logger.Warn().Caller().Msg("Message failed to send")
 		}
 
 	case "!roll ":
@@ -103,12 +98,12 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			_, err := s.ChannelMessageSend(m.ChannelID, "You rolled "+strconv.Itoa(b)+" dice. \nThe result was: "+strconv.Itoa(a))
 			if err != nil {
-				logging.LogError(err)
+				log.Logger.Warn().Caller().Msg("Message failed to send")
 			}
 		} else {
 			_, err := s.ChannelMessageSend(m.ChannelID, "You need to supply the number of dice to roll.\nFor example, for three dice: !roll 3")
 			if err != nil {
-				logging.LogError(err)
+				log.Logger.Warn().Caller().Msg("Message failed to send")
 			}
 		}
 
@@ -123,7 +118,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Println("Opening a file ")
 		var file, err = os.ReadFile("./ascii-image.txt")
 		if err != nil {
-			logging.LogError(err)
+			log.Logger.Warn().Caller().Msg("Failed to read image file")
 			return
 		}
 
@@ -133,13 +128,13 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			_, err2 := s.ChannelMessageSend(m.ChannelID, "The image failed to convert! Let my owner know!")
 			if err2 != nil {
-				logging.LogError(err)
+				log.Logger.Warn().Caller().Msg("Message failed to send")
 			}
 			return
 		} else {
 			_, err = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
 			if err != nil {
-				logging.LogError(err)
+				log.Logger.Warn().Caller().Msg("Message failed to send")
 			}
 		}
 
