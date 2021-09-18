@@ -42,7 +42,6 @@ func Start() {
 
 	goBot.AddHandler(messageHandler)       // function to fire when a message is posted
 	goBot.AddHandler(channelUpdateHandler) // function to fire when a channel is joined
-	goBot.AddHandler(channelLeave)         // function to fire when a channel is left [not implemented yet]
 
 	err = goBot.Open()
 	if err != nil {
@@ -53,34 +52,56 @@ func Start() {
 	log.Logger.Info().Msg("Bot is now running")
 }
 
-func channelLeave(s *discordgo.Session, m *discordgo.Event) {
-	//Dunno how to track when the person leaves the channel.
-}
-
 func channelUpdateHandler(s *discordgo.Session, m *discordgo.VoiceStateUpdate) {
 	// get array of channel structs
 	channels, err := s.GuildChannels(m.GuildID)
 	if err != nil {
 		log.Logger.Warn().Caller().Msg("Could not get channels")
+	}
+
+	if m.ChannelID == "" {
+		log.Logger.Info().Msg("Channel left. " + m.BeforeUpdate.ChannelID)
+		for i := 0; i < len(channels); i++ {
+			if channels[i].ID == m.BeforeUpdate.ChannelID && strings.Contains(channels[i].Name, "Team Room; 1 Users") {
+				log.Logger.Debug().Msg("Deleting channel with ID: " + m.BeforeUpdate.ChannelID)
+				_, err := s.ChannelDelete(m.BeforeUpdate.ChannelID)
+				if err != nil {
+					log.Logger.Warn().Msg("Could not delete channel with ID: " + m.BeforeUpdate.ChannelID)
+				}
+			}
+		}
 		return
 	}
 
-	for i := 0; i < len(channels)-1; i++ {
-		if channels[i].ID == m.ChannelID && channels[i].Name == "Dynamic Channel" {
-			// create channel with the same name
-			c, err := s.GuildChannelCreateComplex(m.GuildID, discordgo.GuildChannelCreateData{
-				Name:     channels[i].Name + " 1", //TODO: Gonna make this more dynamic
-				Type:     2,
-				ParentID: channels[i].ParentID,
-			})
-			if err != nil {
-				log.Logger.Warn().Msg("Couldn't create channel\n" + err.Error())
+	log.Logger.Info().Msg("Channel Joined. ChannelID: " + m.ChannelID)
+
+	for i := 0; i < len(channels); i++ {
+		if channels[i].ID == m.ChannelID {
+			if strings.Contains(channels[i].Name, "Create") && strings.Contains(channels[i].Name, "Channel") {
+				fmt.Println("Um check passed?")
+				// create channel with the same name
+				numOfUsers := 5
+				c, err := s.GuildChannelCreateComplex(m.GuildID, discordgo.GuildChannelCreateData{
+					Name:      "Team Room; 1 Users",
+					Type:      2,
+					ParentID:  channels[i].ParentID,
+					UserLimit: numOfUsers, //TODO: Gonna make this more dynamic
+				})
+				if err != nil {
+					log.Logger.Warn().Msg("Couldn't create channel\n" + err.Error())
+					return
+				}
+				// move people to the new channel
+				s.GuildMemberMove(m.GuildID, m.UserID, &c.ID)
+			} else if strings.Contains(channels[i].Name, "Team Room; ") { //TODO: Figure out how to get the number of users in a channel at any given point
+				for i := 1; i < 9; i++ {
+					if strings.Contains(channels[i].Name, strconv.Itoa(i)) {
+						s.ChannelEdit(m.ChannelID, "Team Room; "+strconv.Itoa(i)+" Users")
+					}
+				}
 			}
-			// move people to the new channel
-			s.GuildMemberMove(m.GuildID, m.UserID, &c.ID)
 		}
 	}
-
 }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -168,6 +189,5 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				log.Logger.Warn().Caller().Msg("Message failed to send")
 			}
 		}
-
 	}
 }
