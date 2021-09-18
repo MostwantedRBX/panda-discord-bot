@@ -40,11 +40,9 @@ func Start() {
 
 	botID = u.ID
 
-	//	tells discordgo what function will process messages
-
-	goBot.AddHandler(messageHandler)
-	goBot.AddHandler(channelUpdateHandler)
-	goBot.AddHandler(channelLeave)
+	goBot.AddHandler(messageHandler)       // function to fire when a message is posted
+	goBot.AddHandler(channelUpdateHandler) // function to fire when a channel is joined
+	goBot.AddHandler(channelLeave)         // function to fire when a channel is left [not implemented yet]
 
 	err = goBot.Open()
 	if err != nil {
@@ -60,6 +58,7 @@ func channelLeave(s *discordgo.Session, m *discordgo.Event) {
 }
 
 func channelUpdateHandler(s *discordgo.Session, m *discordgo.VoiceStateUpdate) {
+	// get array of channel structs
 	channels, err := s.GuildChannels(m.GuildID)
 	if err != nil {
 		log.Logger.Warn().Caller().Msg("Could not get channels")
@@ -68,6 +67,7 @@ func channelUpdateHandler(s *discordgo.Session, m *discordgo.VoiceStateUpdate) {
 
 	for i := 0; i < len(channels)-1; i++ {
 		if channels[i].ID == m.ChannelID && channels[i].Name == "Dynamic Channel" {
+			// create channel with the same name
 			c, err := s.GuildChannelCreateComplex(m.GuildID, discordgo.GuildChannelCreateData{
 				Name:     channels[i].Name + " 1", //TODO: Gonna make this more dynamic
 				Type:     2,
@@ -76,6 +76,7 @@ func channelUpdateHandler(s *discordgo.Session, m *discordgo.VoiceStateUpdate) {
 			if err != nil {
 				log.Logger.Warn().Msg("Couldn't create channel\n" + err.Error())
 			}
+			// move people to the new channel
 			s.GuildMemberMove(m.GuildID, m.UserID, &c.ID)
 		}
 	}
