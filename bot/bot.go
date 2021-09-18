@@ -41,7 +41,11 @@ func Start() {
 	botID = u.ID
 
 	//	tells discordgo what function will process messages
+
 	goBot.AddHandler(messageHandler)
+	goBot.AddHandler(channelUpdateHandler)
+	goBot.AddHandler(channelLeave)
+
 	err = goBot.Open()
 	if err != nil {
 		log.Logger.Fatal().Msg("Bot could not add a message handler")
@@ -49,11 +53,37 @@ func Start() {
 	}
 
 	log.Logger.Info().Msg("Bot is now running")
+}
+
+func channelLeave(s *discordgo.Session, m *discordgo.Event) {
+	//Dunno how to track when the person leaves the channel.
+}
+
+func channelUpdateHandler(s *discordgo.Session, m *discordgo.VoiceStateUpdate) {
+	channels, err := s.GuildChannels(m.GuildID)
+	if err != nil {
+		log.Logger.Warn().Caller().Msg("Could not get channels")
+		return
+	}
+
+	for i := 0; i < len(channels)-1; i++ {
+		if channels[i].ID == m.ChannelID && channels[i].Name == "Dynamic Channel" {
+			c, err := s.GuildChannelCreateComplex(m.GuildID, discordgo.GuildChannelCreateData{
+				Name:     channels[i].Name + " 1", //TODO: Gonna make this more dynamic
+				Type:     2,
+				ParentID: channels[i].ParentID,
+			})
+			if err != nil {
+				log.Logger.Warn().Msg("Couldn't create channel\n" + err.Error())
+			}
+			s.GuildMemberMove(m.GuildID, m.UserID, &c.ID)
+		}
+	}
 
 }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-
+	s.GuildChannels(m.GuildID)
 	//	make sure the bot isn't going to trigger itself and check to make sure the bots prefix was used
 	if m.Author.ID == botID || !strings.HasPrefix(m.Content, config.BotPrefix) {
 		return
@@ -66,7 +96,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	//	command splits the message recieved into the command, on command[0] and the arguments on command[1]
 	switch command := strings.SplitAfter(cont, " "); command[0] {
 
-	case "!ping ":
+	case "!ping":
 		//	used to test if the bot is on
 		_, err := s.ChannelMessageSend(m.ChannelID, "Pong!")
 		if err != nil {

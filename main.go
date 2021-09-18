@@ -18,7 +18,6 @@ func main() {
 	}
 	defer file.Close()
 
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	multi := io.MultiWriter(zerolog.ConsoleWriter{Out: os.Stderr}, file)
 	log.Logger = log.Output(multi)
 	log.Logger.Info().Msg("Logs started")
