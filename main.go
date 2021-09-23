@@ -4,13 +4,15 @@ import (
 	"io"
 	"os"
 
-	"github.com/mostwantedrbx/discord-go/bot"
-	"github.com/mostwantedrbx/discord-go/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/mostwantedrbx/discord-go/bot"
+	"github.com/mostwantedrbx/discord-go/config"
 )
 
 func main() {
+	//	log setup
 	//	log setup
 	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(0666))
 	if err != nil {
@@ -18,8 +20,7 @@ func main() {
 	}
 	defer file.Close()
 
-	multi := io.MultiWriter(zerolog.ConsoleWriter{Out: os.Stderr}, file)
-	log.Logger = log.Output(multi)
+	log.Logger = log.Output(io.MultiWriter(zerolog.ConsoleWriter{Out: os.Stderr}, file))
 	log.Logger.Info().Msg("Logs started")
 
 	//	read the config

@@ -2,19 +2,14 @@ package bot
 
 import (
 	"fmt"
-	"math/rand"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/mostwantedrbx/discord-go/config"
-	"github.com/mostwantedrbx/discord-go/net"
-	"github.com/mostwantedrbx/discord-go/pyscripts"
-	"github.com/mostwantedrbx/discord-go/storage"
 	"github.com/rs/zerolog/log"
 
-	_ "embed"
+	"github.com/mostwantedrbx/discord-go/commands"
+	"github.com/mostwantedrbx/discord-go/config"
 )
 
 //	init some variables
@@ -24,6 +19,7 @@ var botID string
 
 //	this function gets called from the main.go file
 func Start() {
+
 	//	create a new discord session
 	goBot, err := discordgo.New("Bot " + config.Token)
 
@@ -115,7 +111,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var cont = strings.ToLower(m.Content)
 
 	//	long list of if statements to check what we need to do
-	//	command splits the message recieved into the command, on command[0] and the arguments on command[1]
+	//	command splits the message received into the command, on command[0] and the arguments on command[1]
 	switch command := strings.SplitAfter(cont, " "); command[0] {
 
 	case "!ping":
@@ -126,68 +122,23 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 	case "!echo ":
+		//	responds to the user with the same thing they told the bot
 		if len(command) > 1 {
-			_, err := s.ChannelMessageSend(m.ChannelID, command[1])
-			if err != nil {
-				log.Logger.Warn().Caller().Msg("Message failed to send")
-			}
+			commands.Echo(s, m, command[1])
 		}
 
 	case "!pokemon ":
 		//	silly command for funsies
-		_, err := s.ChannelMessageSend(m.ChannelID, storage.ReturnRandomPokemon())
-		if err != nil {
-			log.Logger.Warn().Caller().Msg("Message failed to send")
-		}
+		commands.Pokemon(s, m)
 
 	case "!roll ":
 		//	rolls command[1] amount of dice
-		if b, err := strconv.Atoi(command[1]); err == nil {
-			var a = rand.Intn(6 * b)
-			for ok := true; ok; ok = (a < b) {
-				a = rand.Intn(6 * b)
-				fmt.Println("rerolling die...")
-			}
-			_, err := s.ChannelMessageSend(m.ChannelID, "You rolled "+strconv.Itoa(b)+" dice. \nThe result was: "+strconv.Itoa(a))
-			if err != nil {
-				log.Logger.Warn().Caller().Msg("Message failed to send")
-			}
-		} else {
-			_, err := s.ChannelMessageSend(m.ChannelID, "You need to supply the number of dice to roll.\nFor example, for three dice: !roll 3")
-			if err != nil {
-				log.Logger.Warn().Caller().Msg("Message failed to send")
-			}
-		}
+		commands.Roll(s, m, command[1])
 
 	case "!convert ":
-		// download the file from the url
-		net.DownloadFile(command[1], "tacos.png")
-
-		//	run the python script to convert the image, and it saves it in a txt file.
-		pyscripts.RunScript("convert")
-
-		//	gets the results
-		fmt.Println("Opening a file ")
-		var file, err = os.ReadFile("./ascii-image.txt")
-		if err != nil {
-			log.Logger.Warn().Caller().Msg("Failed to read image file")
-			return
-		}
-
-		//	send the contents to the pastebin function to be pasted
-		p := storage.Pastebin{}
-		link, err := p.Put(string(file), "Ascii Image")
-		if err != nil {
-			_, err2 := s.ChannelMessageSend(m.ChannelID, "The image failed to convert! Let my owner know!")
-			if err2 != nil {
-				log.Logger.Warn().Caller().Msg("Message failed to send")
-			}
-			return
-		} else {
-			_, err = s.ChannelMessageSend(m.ChannelID, "Your image has been pasted at: "+link)
-			if err != nil {
-				log.Logger.Warn().Caller().Msg("Message failed to send")
-			}
-		}
+		//	converts and image link to an ascii char image then posts to pastebin
+		commands.Convert(s, m, command[1])
+	case "!imbored":
+		commands.Bored(s, m)
 	}
 }

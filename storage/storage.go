@@ -11,6 +11,10 @@ import (
 	"github.com/mostwantedrbx/discord-go/config"
 )
 
+type Bored struct {
+	Activity string `json:"activity"`
+}
+
 func ReturnRandomPokemon() string {
 	//	TODO: find a better way to store this, seems like a mundane use of resources to have a package dedicated to this
 	pokemon := [6]string{
@@ -25,15 +29,15 @@ func ReturnRandomPokemon() string {
 }
 
 var (
-	// errPutFailed is returned when a paste could not be uploaded to pastebin.
+	//	errPutFailed is returned when a paste could not be uploaded to pastebin.
 	errPutFailed = errors.New("pastebin put failed")
 )
 
 //	pastebin stuff
-//	Pastebin represents an instance of the pastebin service.
+//	pastebin represents an instance of the pastebin service.
 type Pastebin struct{}
 
-//	Put uploads text to Pastebin with optional title returning the ID or an error.
+//	put uploads text to Pastebin with optional title returning the ID or an error.
 func (p Pastebin) Put(text, title string) (id string, err error) {
 	data := url.Values{}
 
