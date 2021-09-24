@@ -114,6 +114,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	//	command splits the message received into the command, on command[0] and the arguments on command[1]
 	switch command := strings.SplitAfter(cont, " "); command[0] {
 
+	case "!help":
+		//	sends an embed message with commands
+		commands.Help(s, m)
+
 	case "!ping":
 		//	used to test if the bot is on
 		_, err := s.ChannelMessageSend(m.ChannelID, "Pong!")
@@ -139,6 +143,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		//	converts and image link to an ascii char image then posts to pastebin
 		commands.Convert(s, m, command[1])
 	case "!imbored":
+		//	gives an activity idea to the user
 		commands.Bored(s, m)
 	}
 }

@@ -25,6 +25,7 @@ func ReturnRandomPokemon() string {
 		"My favourite Pokemon is Snorlax",
 		"I heard there was a panda Pokemon...",
 	}
+
 	return pokemon[rand.Intn(5)]
 }
 

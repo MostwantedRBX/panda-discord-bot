@@ -16,6 +16,64 @@ import (
 	"github.com/mostwantedrbx/discord-go/storage"
 )
 
+func Help(s *discordgo.Session, m *discordgo.MessageCreate) {
+	//	when someone calls !help the bot responds with these embed messages.
+
+	//	they needed to be split since discord wont take one massive pile of data-
+	//	for an embed message
+	helpField := []*discordgo.MessageEmbedField{
+		{
+			Name: "-", Value: "Random/Basic commands",
+		},
+		{
+			Name: "!help", Value: "Brings up this message.",
+		},
+		{
+			Name: "!ping", Value: "Pong!",
+		},
+		{
+			Name: "!echo message", Value: "Makes the bot say message.",
+		},
+		{
+			Name: "!roll numOfDice", Value: "Rolls numOfDice 6 sided dice.",
+		},
+		{
+			Name: "!pokemon", Value: "Says a random pokemon related quote.",
+		},
+		{
+			Name: "!imbored", Value: "Returns a random activity idea from boredapi.com",
+		},
+	}
+	helpField2 := []*discordgo.MessageEmbedField{
+		{
+			Name: "-", Value: "Cool python scripts to try out!",
+		},
+		{
+			Name: "!convert directImageURL", Value: "Converts directImageURL into an ascii image and returns a link to pastebin!",
+		},
+	}
+
+	eMes := discordgo.MessageEmbed{
+		Title:  "Commands!",
+		Color:  3066993,
+		Fields: helpField,
+	}
+	eMes2 := discordgo.MessageEmbed{
+		Title:  "Python Scripts",
+		Color:  3066993,
+		Fields: helpField2,
+	}
+
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, &eMes)
+	if err != nil {
+		log.Logger.Err(err).Caller().Msg("Could not send embed help message.")
+	}
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, &eMes2)
+	if err != nil {
+		log.Logger.Err(err).Caller().Msg("Could not send embed help message.")
+	}
+}
+
 func Roll(s *discordgo.Session, m *discordgo.MessageCreate, command string) {
 	//	rolls {command} 6 sided die and sends it back
 	if b, err := strconv.Atoi(command); err == nil {
@@ -34,6 +92,7 @@ func Roll(s *discordgo.Session, m *discordgo.MessageCreate, command string) {
 			log.Logger.Warn().Caller().Msg("Message failed to send")
 		}
 	}
+
 }
 
 func Convert(s *discordgo.Session, m *discordgo.MessageCreate, command string) {
