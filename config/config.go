@@ -27,8 +27,13 @@ func ReadConfig() error {
 	file, err := ioutil.ReadFile("./config.json")
 
 	if err != nil {
-		log.Logger.Fatal().Msg("Could not read config file.")
-		return err
+		log.Logger.Warn().Msg("Could not read config file. Trying to make default. Please add your tokens/bot prefix to config.json")
+		err = createConfig()
+		if err != nil {
+			log.Logger.Fatal().Msg("Creation of config.json failed. Maybe the program doesn't have permission to write?")
+			return err
+		}
+		return nil
 	}
 
 	//	unpack json
@@ -43,5 +48,22 @@ func ReadConfig() error {
 	PastebinToken = config.PastebinToken
 	BotPrefix = config.BotPrefix
 
+	return nil
+}
+
+func createConfig() error {
+	conf := configStruct{
+		Token:         "",
+		PastebinToken: "",
+		BotPrefix:     "",
+	}
+	defaultConfig, err := json.MarshalIndent(conf, "", "	")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile("./config.json", defaultConfig, 0644)
+	if err != nil {
+		return err
+	}
 	return nil
 }

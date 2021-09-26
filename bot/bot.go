@@ -1,8 +1,6 @@
 package bot
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -15,7 +13,13 @@ import (
 //	init some variables
 var botID string
 
-//var goBot *discordgo.Session
+// type VoiceUsers struct {
+// 	GuildID   string
+// 	ChannelID string
+// 	UserID    string
+// }
+
+// var ChannelUsers []VoiceUsers
 
 //	this function gets called from the main.go file
 func Start() {
@@ -44,64 +48,21 @@ func Start() {
 		log.Logger.Fatal().Msg("Bot could not add a message handler")
 		return
 	}
-
 	log.Logger.Info().Msg("Bot is now running")
 }
 
 func channelUpdateHandler(s *discordgo.Session, m *discordgo.VoiceStateUpdate) {
 	// get array of channel structs
-	channels, err := s.GuildChannels(m.GuildID)
-	if err != nil {
-		log.Logger.Warn().Caller().Msg("Could not get channels")
-	}
-	if m.ChannelID == "" {
-		log.Logger.Info().Msg("Channel left. " + m.BeforeUpdate.ChannelID)
-		for i := 0; i < len(channels); i++ {
-			if channels[i].ID == m.BeforeUpdate.ChannelID && strings.Contains(channels[i].Name, "Team Room; 1 Users") {
-				log.Logger.Debug().Msg("Deleting channel with ID: " + m.BeforeUpdate.ChannelID)
-				_, err := s.ChannelDelete(m.BeforeUpdate.ChannelID)
-				if err != nil {
-					log.Logger.Warn().Msg("Could not delete channel with ID: " + m.BeforeUpdate.ChannelID)
-				}
-			}
-		}
-		return
-	}
 
-	log.Logger.Info().Msg("Channel Joined. ChannelID: " + m.ChannelID)
-	for i := 0; i < len(channels); i++ {
-		if channels[i].ID == m.ChannelID {
-			if strings.Contains(channels[i].Name, "Create") && strings.Contains(channels[i].Name, "Channel") {
-				fmt.Println("Um check passed?")
-				// create channel with the same name
-				numOfUsers := 5
-				c, err := s.GuildChannelCreateComplex(m.GuildID, discordgo.GuildChannelCreateData{
-					Name:      "Team Room; 1 Users",
-					Type:      2,
-					ParentID:  channels[i].ParentID,
-					UserLimit: numOfUsers, //TODO: Gonna make this more dynamic
-				})
-				if err != nil {
-					log.Logger.Warn().Msg("Couldn't create channel\n" + err.Error())
-					return
-				}
-				// move people to the new channel
-				s.GuildMemberMove(m.GuildID, m.UserID, &c.ID)
-			} else if strings.Contains(channels[i].Name, "Team Room; ") { //TODO: Figure out how to get the number of users in a channel at any given point
-				for i := 1; i < 9; i++ {
-					if strings.Contains(channels[i].Name, strconv.Itoa(i)) {
-						s.ChannelEdit(m.ChannelID, "Team Room; "+strconv.Itoa(i)+" Users")
-					}
-				}
-			}
-		}
-	}
+	// vu := VoiceUsers{
+	// 	GuildID:   m.GuildID,
+	// 	ChannelID: m.ChannelID,
+	// 	UserID:    m.UserID,
+	// }
+	// ChannelUsers = append(ChannelUsers, vu)
+	// fmt.Println("added" + ChannelUsers[0].ChannelID)
+
 }
-
-// func channelUpdateJoinHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
-// 	vs := v.VoiceState
-// 	log.Logger.Info().Msg(vs.UserID)
-// }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	s.GuildChannels(m.GuildID)
