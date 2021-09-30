@@ -1,13 +1,16 @@
 package bot
 
 import (
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
 
 	"github.com/mostwantedrbx/discord-go/commands"
 	"github.com/mostwantedrbx/discord-go/config"
+	"github.com/mostwantedrbx/discord-go/crypt"
 )
 
 //	init some variables
@@ -135,9 +138,55 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 	case "!coins ":
+		if len(command) > 2 && command[1] == "remindme " {
+
+			realCoin, err := crypt.ConfirmCoin(command[2][:len(command[2])-1])
+			if err != nil {
+				log.Logger.Warn().Err(err).Msg("Coins Remind me failed.")
+			}
+
+			if !realCoin {
+
+				_, err := s.ChannelMessageSend(m.ChannelID, "Please give a real crypto currency name after !coins remindme I.E.: !coins remindme bitcoin 5 minutes")
+				if err != nil {
+					log.Logger.Warn().Err(err).Caller().Msg("Could not send chat message")
+				}
+
+				return
+			}
+
+			go func() {
+				amount, _ := strconv.Atoi(command[3])
+				switch command[4] {
+				case "minutes":
+					_, err := s.ChannelMessageSend(m.ChannelID, "I will remind you in "+command[3]+" "+command[4]+", about the price of "+command[2])
+					if err != nil {
+						log.Logger.Warn().Err(err).Msg("Could not send message!")
+					}
+					time.Sleep(time.Duration(amount) * time.Minute)
+					_, _ = s.ChannelMessageSend(m.ChannelID, "Min") //debug
+
+				default:
+					_, err := s.ChannelMessageSend(m.ChannelID, "That was in invalid length of time. Try !coins remindme bitcoin 2 hours")
+					log.Logger.Info().Msg(command[0] + ":" + command[1] + ":" + command[2] + ":" + command[3] + ":" + command[4]) //debug
+					if err != nil {
+						log.Logger.Warn().Err(err).Msg("Could not send message!")
+					}
+				}
+
+				err = commands.Coins(s, m, strings.ReplaceAll(command[2], " ", ""))
+				if err != nil {
+					log.Logger.Warn().Err(err).Msg("Coins command failed.")
+				}
+
+			}()
+			return
+		}
+
 		if len(command) == 1 {
 			s.ChannelMessageSend(m.ChannelID, "Please give a cryptocurrency name as an argument after !coins, I.E.: !coins bitcoin")
 		}
+
 		err := commands.Coins(s, m, strings.ToLower(command[1]))
 		if err != nil {
 			log.Logger.Warn().Err(err).Msg("Coins command failed.")

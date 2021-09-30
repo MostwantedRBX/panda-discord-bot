@@ -179,14 +179,13 @@ func Bored(s *discordgo.Session, m *discordgo.MessageCreate) error {
 
 func Coins(s *discordgo.Session, m *discordgo.MessageCreate, coin string) error {
 	var coinStats crypt.CoinData
+
 	coinStats, err := crypt.FetchCoinData(coin)
 	if err != nil {
 		return err
 	}
+
 	coinField := []*discordgo.MessageEmbedField{
-		{
-			Name: "ID:", Value: coinStats.ID,
-		},
 		{
 			Name: "Rank:", Value: strconv.Itoa(coinStats.Rank),
 		},

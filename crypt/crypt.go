@@ -101,3 +101,11 @@ func FetchCoinData(c string) (CoinData, error) {
 
 	return coinStats, nil
 }
+
+func ConfirmCoin(c string) (bool, error) {
+	_, err := FetchCoinData(c)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
