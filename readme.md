@@ -36,8 +36,8 @@ The json should look like this:
 
 | Name | Description |
 |-|-|
-| "DiscordBotToken" | Change this to the bot token you generate from: https://discord.com/developers/applications |
-| "PastebinToken" | Change this to the token from: https://pastebin.com/doc_api (requires account)|
+| "DiscordBotToken" | Change this to the bot token you generate [here](https://discord.com/developers/applications). |
+| "PastebinToken" | Change this to the token [here](https://pastebin.com/doc_api). (requires account)|
 | "BotPrefix" | This is the prefix on commands, change it to what you like. Normally bots use `!<command>`, in that case change it to `!` |
 
 ### Fire it up!
