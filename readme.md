@@ -42,5 +42,5 @@ The json should look like this:
 ### Fire it up!
 The next thing to do is to start it up and it will appear to be online on all servers your bot token is invited to. If you need help inviting it to your server check on the discord dev portal, or get in contact with me on discord @ `panda#4464`
 
-Now the bot is ready to use, go ahead and try the command `<ChosenPrefix>help`
+Now the bot is ready to use, go ahead and try the command `<BotPrefix>help`
 This will give you the included commands. 
