@@ -55,7 +55,7 @@ func createConfig() error {
 	conf := configStruct{
 		Token:         "",
 		PastebinToken: "",
-		BotPrefix:     "",
+		BotPrefix:     "!",
 	}
 	defaultConfig, err := json.MarshalIndent(conf, "", "	")
 	if err != nil {
