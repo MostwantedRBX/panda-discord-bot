@@ -19,7 +19,8 @@
 ## Hosting
 ### Prerequisites
 You will need ot install the following:
-- Python 3 (with pillow) - This is for the `!convert` command. If you don't install it the command will crash the program.
+- [Python 3](https://www.python.org/downloads/) (with [pillow](https://pillow.readthedocs.io/en/stable/installation.html#basic-installation)) - This is for the `!convert` command. If you don't install it the command will crash the program.
+
 
 ### Setup
 First thing you need to do is run the application once, then close it, this will generate a default config.json file in the same directory. This contains your various tokens and bot prefix
