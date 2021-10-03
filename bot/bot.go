@@ -122,27 +122,28 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 	case "!convert ":
+		//	converts and image link to an ascii char image then posts to pastebin
 		if len(command) == 1 {
 			s.ChannelMessageSend(m.ChannelID, "Please give a direct URL to an image as an argument after !convert, I.E.: !convert URL_HERE")
 		}
-		//	converts and image link to an ascii char image then posts to pastebin
+
 		err := commands.Convert(s, m, command[1])
 		if err != nil {
 			log.Logger.Warn().Err(err).Msg("Convert command could not go through.")
 		}
+
 	case "!imbored":
 		//	gives an activity idea to the user
 		err := commands.Bored(s, m)
 		if err != nil {
 			log.Logger.Warn().Err(err).Msg("ImBored command could not go through.")
 		}
-
 	case "!coins ":
 		if len(command) > 2 && command[1] == "remindme " {
 
-			realCoin, err := crypt.ConfirmCoin(command[2][:len(command[2])-1])
+			realCoin, err := crypt.ConfirmCoin(strings.TrimSpace(command[2]))
 			if err != nil {
-				log.Logger.Warn().Err(err).Msg("Coins Remind me failed.")
+				log.Logger.Warn().Err(err).Msg("Could not get coin due to an error.")
 			}
 
 			if !realCoin {
@@ -156,19 +157,43 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 
 			go func() {
-				amount, _ := strconv.Atoi(command[3])
+
+				amount, err := strconv.Atoi(strings.TrimSpace(command[3]))
+				if err != nil {
+					log.Logger.Warn().Err(err).Msg("Could convert string")
+				}
+
 				switch command[4] {
-				case "minutes":
+				case "minutes", "minute":
+
 					_, err := s.ChannelMessageSend(m.ChannelID, "I will remind you in "+command[3]+" "+command[4]+", about the price of "+command[2])
 					if err != nil {
 						log.Logger.Warn().Err(err).Msg("Could not send message!")
 					}
+
 					time.Sleep(time.Duration(amount) * time.Minute)
-					_, _ = s.ChannelMessageSend(m.ChannelID, "Min") //debug
+				case "hours", "hour":
+
+					_, err := s.ChannelMessageSend(m.ChannelID, "I will remind you in "+command[3]+" "+command[4]+", about the price of "+command[2])
+					if err != nil {
+						log.Logger.Warn().Err(err).Msg("Could not send message!")
+					}
+
+					time.Sleep(time.Duration(amount) * time.Hour)
+				case "days", "day":
+
+					_, err := s.ChannelMessageSend(m.ChannelID, "I will remind you in "+command[3]+" "+command[4]+", about the price of "+command[2])
+					if err != nil {
+						log.Logger.Warn().Err(err).Msg("Could not send message!")
+					}
+
+					time.Sleep(time.Duration(amount) * (time.Hour * 24))
 
 				default:
 					_, err := s.ChannelMessageSend(m.ChannelID, "That was in invalid length of time. Try !coins remindme bitcoin 2 hours")
+
 					log.Logger.Info().Msg(command[0] + ":" + command[1] + ":" + command[2] + ":" + command[3] + ":" + command[4]) //debug
+
 					if err != nil {
 						log.Logger.Warn().Err(err).Msg("Could not send message!")
 					}
@@ -185,6 +210,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		if len(command) == 1 {
 			s.ChannelMessageSend(m.ChannelID, "Please give a cryptocurrency name as an argument after !coins, I.E.: !coins bitcoin")
+			return
 		}
 
 		err := commands.Coins(s, m, strings.ToLower(command[1]))
